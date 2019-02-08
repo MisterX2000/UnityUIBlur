@@ -1,7 +1,8 @@
-﻿Shader "UI/Super Blur"
+﻿Shader "Custom/UIBlur"
 {
 	Properties
 	{
+		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_SuperBlurTexture ("Background Texture", 2D) = "white" {}
 
 		_Color ("Tint", Color) = (1,1,1,0)
@@ -74,8 +75,8 @@
 			fixed4 _Color;
 			float4 _ClipRect;
 
-			sampler2D _SuperBlurTexture;
-			float2 _SuperBlurTexture_TexelSize;
+			sampler2D _BlurTexture;
+			//float2 _SuperBlurTexture_TexelSize;
 
 			v2f vert(appdata_t IN)
 			{
@@ -99,7 +100,7 @@
 
 			fixed4 frag(v2f IN) : SV_Target
 			{
-				half3 bgcolor = tex2Dproj(_SuperBlurTexture, IN.grabPos).rgb * IN.color;
+				half3 bgcolor = tex2Dproj(_BlurTexture, IN.grabPos).rgb * IN.color;
 				return half4(bgcolor, 1.0);
 			}
 		ENDCG

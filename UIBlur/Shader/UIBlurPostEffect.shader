@@ -1,10 +1,9 @@
-﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-Shader "Custom/SuperBlurPostEffect"
+﻿Shader "Custom/UIBlurPostEffect"
 {
 	Properties
 	{
 		_MainTex ("", 2D) = "white" {}
+		_Radius("Radius", Range(1, 255)) = 1
 	}
 
 	CGINCLUDE
