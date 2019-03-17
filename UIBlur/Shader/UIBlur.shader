@@ -2,20 +2,20 @@
 {
 	Properties
 	{
-		_MainTex ("Base (RGB)", 2D) = "white" {}
-		_SuperBlurTexture ("Background Texture", 2D) = "white" {}
-
-		_Color ("Tint", Color) = (1,1,1,0)
+		[PerRendererData] _MainTex("Sprite Texture", 2D) = "white" {}
+		[Toggle(IS_BLUR_ALPHA_MASKED)] _IsAlphaMasked("Image Alpha Masks Blur", Float) = 1
 		
-		_StencilComp ("Stencil Comparison", Float) = 8
-		_Stencil ("Stencil ID", Float) = 0
-		_StencilOp ("Stencil Operation", Float) = 0
-		_StencilWriteMask ("Stencil Write Mask", Float) = 255
-		_StencilReadMask ("Stencil Read Mask", Float) = 255
+		[Space]
+		
+		_StencilComp("Stencil Comparison", Float) = 8
+		_Stencil("Stencil ID", Float) = 0
+		_StencilOp("Stencil Operation", Float) = 0
+		_StencilWriteMask("Stencil Write Mask", Float) = 255
+		_StencilReadMask("Stencil Read Mask", Float) = 255
 
-		_ColorMask ("Color Mask", Float) = 15
+		_ColorMask("Color Mask", Float) = 15
 
-		[Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
+		[Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip("Use Alpha Clip", Float) = 0
 	}
 
 	SubShader
@@ -42,7 +42,7 @@
 		Lighting Off
 		ZWrite Off
 		ZTest [unity_GUIZTestMode]
-//		Blend SrcAlpha OneMinusSrcAlpha
+		Blend SrcAlpha OneMinusSrcAlpha
 		ColorMask [_ColorMask]
 
 		Pass
@@ -56,27 +56,27 @@
 			#include "UnityCG.cginc"
 			#include "UnityUI.cginc"
 
+			#pragma multi_compile __ IS_BLUR_ALPHA_MASKED
 			#pragma multi_compile __ UNITY_UI_ALPHACLIP
 			
 			struct appdata_t
 			{
 				float4 vertex   : POSITION;
 				float4 color    : COLOR;
+				float2 texcoord : TEXCOORD0;
 			};
 
 			struct v2f
 			{
 				float4 vertex   : SV_POSITION;
 				fixed4 color    : COLOR;
+				float2 texcoord : TEXCOORD0;
 				float4 worldPosition : TEXCOORD1;
 				float4 grabPos  : TEXCOORD2;
 			};
 			
-			fixed4 _Color;
-			float4 _ClipRect;
-
 			sampler2D _BlurTexture;
-			//float2 _SuperBlurTexture_TexelSize;
+			sampler2D _MainTex;
 
 			v2f vert(appdata_t IN)
 			{
@@ -84,24 +84,31 @@
 				OUT.worldPosition = IN.vertex;
 				OUT.vertex = UnityObjectToClipPos(OUT.worldPosition);
 
-			#ifdef UNITY_HALF_TEXEL_OFFSET
-				OUT.vertex.xy += (_ScreenParams.zw-1.0) * float2(-1,1) * OUT.vertex.w;
-			#endif
+				#ifdef UNITY_HALF_TEXEL_OFFSET
+					OUT.vertex.xy += (_ScreenParams.zw-1.0) * float2(-1,1) * OUT.vertex.w;
+				#endif
 
 				OUT.grabPos = ComputeGrabScreenPos(OUT.vertex);
 
-			#if UNITY_UV_STARTS_AT_TOP
-				OUT.grabPos.y = 1.0 - OUT.grabPos.y;
-			#endif
+				#if UNITY_UV_STARTS_AT_TOP
+					OUT.grabPos.y = 1.0 - OUT.grabPos.y;
+				#endif
 
-				OUT.color = IN.color * _Color;
+				OUT.texcoord = IN.texcoord;
+				OUT.color = IN.color;
 				return OUT;
 			}
 
 			fixed4 frag(v2f IN) : SV_Target
 			{
-				half3 bgcolor = tex2Dproj(_BlurTexture, IN.grabPos).rgb * IN.color;
-				return half4(bgcolor, 1.0);
+				#if IS_BLUR_ALPHA_MASKED
+					half4 maskCol = tex2D(_MainTex, IN.texcoord);
+					float alpha = maskCol.a * IN.color.a;
+				#else
+					float alpha = IN.color.a;
+				#endif
+
+				return half4(tex2Dproj(_BlurTexture, IN.grabPos).rgb * IN.color.rgb, alpha);
 			}
 		ENDCG
 		}

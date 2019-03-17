@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: UIBlurPostEffect
-  m_Shader: {fileID: 4800000, guid: 43b4ff9bc15cd22479b1088bec5c4d60, type: 3}
+  m_Shader: {fileID: 4800000, guid: 1f9c70bf6f9cd1c4ca1a1d93c68482b9, type: 3}
   m_ShaderKeywords: _EMISSION
   m_LightmapFlags: 1
   m_EnableInstancingVariants: 0
@@ -73,7 +73,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Radius: 4.2
+    - _Radius: 2
     - _Size: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1

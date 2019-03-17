@@ -2,7 +2,7 @@
 {
 	Properties
 	{
-		_MainTex ("", 2D) = "white" {}
+		_MainTex ("Main", 2D) = "white" {}
 		_Radius("Radius", Range(1, 255)) = 1
 	}
 
